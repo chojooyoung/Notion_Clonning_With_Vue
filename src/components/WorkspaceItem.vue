@@ -2,7 +2,15 @@
   <li>
     <div
       :style="{paddingLeft: `${14 * depth}px`}"
-      class="title">
+      :class="{ active: parseInt($route.params.id, 10) === workspace.id }"
+
+      class="title"
+      @click="$router.push({
+        name: 'Workspace',
+        params: {
+          id: workspace.id
+        }
+      })">
       <span
         :class="{active:showChildren}"
         class="material-icons"
@@ -63,11 +71,15 @@ export default {
             return this.workspace.documents && this.workspace.documents.length
         }
     },
+    created(){
+      
+    },
     methods:{
-        createWorkspace(){
-        this.$store.dispatch('workspace/createWorkspace',{
+        async createWorkspace(){
+        await this.$store.dispatch('workspace/createWorkspace',{
             parentId: this.workspace.id
         })
+        this.showChildren=true
         },
         deleteWorkspace(){
         this.$store.dispatch('workspace/deleteWorkspace',{
@@ -94,6 +106,16 @@ li{
                 display:flex
             }
         }
+        &.active {
+        background-color: $color-background--hover1;
+        &:hover {
+        background-color: $color-background--hover2;
+        }
+        .text {
+        font-weight: 700;
+        color: rgba($color-font, .8);
+        }
+      }
         .material-icons{
             font-size: 18px;
             color:$color-icon;

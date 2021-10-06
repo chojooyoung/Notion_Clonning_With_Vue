@@ -1,5 +1,7 @@
 <template>
-  <nav>
+  <nav 
+    ref="nav"
+    :style="{width: `${navWidth}px`}">
     <div class="header">
       <div class="user-profile"></div>
       주영의 Notion
@@ -10,14 +12,30 @@
         :key="workspace.id"
         :workspace="workspace" />
     </ul>
-    <div class="actions"></div>
+    <div class="actions">
+      <div
+        class="action"
+        @click="$store.dispatch('workspace/createWorkspace')">
+        <span class="material-icons">add</span>새로운 페이지
+      </div>
+    </div>
+    <div
+      ref="resizeHandle"
+      class="resize-handle"
+      @dblclick="navWidth=240"></div>
   </nav>
 </template>
 <script>
+import interact from 'interactjs'
 import WorkspaceItem from '~/components/WorkspaceItem'
 export default {
   components:{
     WorkspaceItem
+  },
+  data(){
+    return{
+      navWidth:240
+    }
   },
   computed:{
     workspaces(){
@@ -26,6 +44,22 @@ export default {
   },
   created(){
     this.$store.dispatch('workspace/readWorkspaces')
+  },
+  mounted(){
+    this.navInit()
+  },
+  methods:{
+    navInit(){
+      interact(this.$refs.nav)
+        .resizable({
+          edges:{
+            right:this.$refs.resizeHandle
+          }
+        })
+        .on('resizemove',event=>{
+          this.navWidth=event.rect.width
+        })
+    }
   }
 }
 </script>
@@ -34,9 +68,15 @@ export default {
 <style lang ="scss" scoped>
 
 nav {
-    width: 240px;
+  max-width: 500px;
+  min-width: 160px;
+  flex-shrink: 0;
     height:100%;
     background-color: $color-background;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+
 
     .header {
         padding:14px;
@@ -53,10 +93,39 @@ nav {
         }
     }
     ul{
-
+      flex-grow: 1;
+      overflow-x: hidden;
+      overflow-y: auto;
     }
-    .action{
-
+    .actions{
+      border-top: 1px solid $color-border;
+    .action {
+      height: 45px;
+      display: flex;
+      align-items: center;
+      padding: 0 14px;
+      color: $color-icon;
+      cursor: pointer;
+      &:hover {
+        background-color: $color-background--hover1;
+      }
+      .material-icons {
+        margin-right: 4px;
+        color: $color-icon;
+      }
+    }
+    }
+    .resize-handle{
+      width: 4px;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      right: 0;
+      cursor: col-resize;
+      transition: .4s;
+      &:hover {
+      background-color: $color-border;
+      }
     }
 }
 </style>
